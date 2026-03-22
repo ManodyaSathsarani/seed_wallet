@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeedBank — Sign In</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green-dark: #1a3a2a;
+      --green-mid:  #2d6a4f;
+      --green-light:#52b788;
+      --cream:      #f8f4ee;
+      --sand:       #e9e0d0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      background-color: var(--green-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(82,183,136,0.08);
+      top: -100px; left: -100px;
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(82,183,136,0.06);
+      bottom: -80px; right: -80px;
+    }
+
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .brand-name span {
+      color: var(--green-light);
+    }
+
+    .brand-tagline {
+      color: rgba(255,255,255,0.55);
+      font-size: 1rem;
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 300px;
+      margin-bottom: 2.5rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .feature-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green-light);
+      flex-shrink: 0;
+    }
+
+    .feature-item span {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+    }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .form-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--green-dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--green-dark);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      background: #fff;
+      border: 1.5px solid var(--sand);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: var(--green-dark);
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--green-mid);
+      box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+      outline: none;
+    }
+
+    .form-select {
+      background: #fff;
+      border: 1.5px solid var(--sand);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: var(--green-dark);
+      transition: border-color 0.2s;
+    }
+
+    .form-select:focus {
+      border-color: var(--green-mid);
+      box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+      outline: none;
+    }
+
+    .btn-primary-custom {
+      background: var(--green-mid);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary-custom:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary-custom:active {
+      transform: translateY(0);
+    }
+
+    .divider-text {
+      text-align: center;
+      color: #bbb;
+      font-size: 0.85rem;
+      margin: 1.2rem 0;
+      position: relative;
+    }
+
+    .divider-text::before,
+    .divider-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 38%;
+      height: 1px;
+      background: var(--sand);
+    }
+
+    .divider-text::before { left: 0; }
+    .divider-text::after  { right: 0; }
+
+    .switch-link {
+      text-align: center;
+      font-size: 0.88rem;
+      color: #888;
+      margin-top: 1.5rem;
+    }
+
+    .switch-link a {
+      color: var(--green-mid);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .switch-link a:hover {
+      text-decoration: underline;
+    }
+
+    .alert-msg {
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      margin-bottom: 1.2rem;
+      display: none;
+    }
+
+    .alert-error  { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c6; }
+    .alert-success{ background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+
+    /* PAGE TOGGLE */
+    .page { display: none; }
+    .page.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card { animation: fadeIn 0.4s ease; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ SIGN IN PAGE ═══════════════════════════ -->
+<div id="page-signin" class="page active w-100">
+  <div class="container-fluid p-0">
+    <div class="row g-0" style="min-height:100vh">
+
+      <!-- Left -->
+      <div class="col-lg-5 left-panel">
+        <div style="position:relative;z-index:1">
+          <div class="brand-name">Seed<span>Bank</span></div>
+          <p class="brand-tagline">A community platform for farmers to manage, share, and trade seeds sustainably.</p>
+          <div class="feature-item"><div class="feature-dot"></div><span>Manage your seed inventory</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Request seeds from the bank</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Buy and sell in the marketplace</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Track distribution history</span></div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="col-lg-7 right-panel">
+        <div class="form-card">
+          <div class="form-title">Welcome back</div>
+          <div class="form-subtitle">Sign in to your farmer account</div>
+
+          <div id="signin-error" class="alert-msg alert-error"></div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" id="signin-username" class="form-control" placeholder="Enter your username"/>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" id="signin-password" class="form-control" placeholder="Enter your password"/>
+          </div>
+
+          <button class="btn-primary-custom" onclick="handleSignIn()">Sign In</button>
+
+          <div class="switch-link">
+            Don't have an account? <a href="#" onclick="showPage('register')">Register here</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ REGISTER PAGE ═══════════════════════════ -->
+<div id="page-register" class="page w-100">
+  <div class="container-fluid p-0">
+    <div class="row g-0" style="min-height:100vh">
+
+      <!-- Left -->
+      <div class="col-lg-5 left-panel">
+        <div style="position:relative;z-index:1">
+          <div class="brand-name">Seed<span>Bank</span></div>
+          <p class="brand-tagline">Join thousands of farmers preserving biodiversity and building sustainable agriculture together.</p>
+          <div class="feature-item"><div class="feature-dot"></div><span>Free to join</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Farmer-to-farmer marketplace</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Admin-managed seed bank</span></div>
+          <div class="feature-item"><div class="feature-dot"></div><span>Expiry tracking & alerts</span></div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="col-lg-7 right-panel">
+        <div class="form-card">
+          <div class="form-title">Create account</div>
+          <div class="form-subtitle">Register as a farmer to get started</div>
+
+          <div id="register-error"   class="alert-msg alert-error"></div>
+          <div id="register-success" class="alert-msg alert-success"></div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" id="reg-username" class="form-control" placeholder="Choose a username"/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Create a password"/>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Role</label>
+            <select id="reg-role" class="form-select">
+              <option value="FARMER">Farmer</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+
+          <button class="btn-primary-custom" onclick="handleRegister()">Create Account</button>
+
+          <div class="switch-link">
+            Already have an account? <a href="#" onclick="showPage('signin')">Sign in here</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API = 'http://localhost:8080/api/v1';
+
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    clearMessages();
+  }
+
+  function clearMessages() {
+    document.querySelectorAll('.alert-msg').forEach(el => {
+      el.style.display = 'none';
+      el.textContent = '';
+    });
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function showSuccess(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function handleSignIn() {
+    clearMessages();
+    const username = document.getElementById('signin-username').value.trim();
+    const password = document.getElementById('signin-password').value.trim();
+
+    if (!username || !password) {
+      showError('signin-error', 'Please fill in all fields.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError('signin-error', data.message || 'Invalid credentials.');
+        return;
+      }
+
+      // Save token and role
+      localStorage.setItem('token', data.data.token);
+      localStorage.setItem('role',  data.data.role);
+      localStorage.setItem('username', username);
+
+      // Redirect based on role
+      if (data.data.role === 'ADMIN') {
+        window.location.href = 'AdminDashboard.html';
+      } else {
+        window.location.href = 'FarmerDashboard.html';
+      }
+
+    } catch (err) {
+      showError('signin-error', 'Could not connect to server.');
+    }
+  }
+
+  async function handleRegister() {
+    clearMessages();
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
+    const role     = document.getElementById('reg-role').value;
+
+    if (!username || !password) {
+      showError('register-error', 'Please fill in all fields.');
+      return;
+    }
+
+    if (password.length < 6) {
+      showError('register-error', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError('register-error', data.message || 'Registration failed.');
+        return;
+      }
+
+      showSuccess('register-success', 'Account created! Redirecting to sign in...');
+      setTimeout(() => showPage('signin'), 1500);
+
+    } catch (err) {
+      showError('register-error', 'Could not connect to server.');
+    }
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const signin = document.getElementById('page-signin');
+    const register = document.getElementById('page-register');
+    if (signin.classList.contains('active')) handleSignIn();
+    else if (register.classList.contains('active')) handleRegister();
+  });
+</script>
+</body>
+</html>

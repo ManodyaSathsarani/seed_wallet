@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeedBank — Farmer Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --green-dark:#1a3a2a; --green-mid:#2d6a4f; --green-light:#52b788; --cream:#f8f4ee; --sand:#e9e0d0; }
+    * { box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); margin:0; }
+    .sidebar { width:240px; min-height:100vh; background:var(--green-dark); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; }
+    .sidebar-brand { font-family:'DM Serif Display',serif; font-size:1.6rem; color:#fff; padding:28px 24px 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .sidebar-brand span { color:var(--green-light); }
+    .sidebar-label { font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:20px 24px 8px; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:11px 24px; color:rgba(255,255,255,0.6); cursor:pointer; font-size:0.9rem; transition:all 0.15s; border-left:3px solid transparent; }
+    .nav-item:hover { color:#fff; background:rgba(255,255,255,0.05); }
+    .nav-item.active { color:#fff; background:rgba(82,183,136,0.12); border-left-color:var(--green-light); }
+    .nav-icon { font-size:1rem; width:20px; text-align:center; }
+    .sidebar-footer { margin-top:auto; padding:20px 24px; border-top:1px solid rgba(255,255,255,0.08); }
+    .farmer-badge { font-size:0.75rem; background:rgba(82,183,136,0.15); color:var(--green-light); border-radius:6px; padding:4px 10px; margin-bottom:10px; display:inline-block; }
+    .logout-btn { font-size:0.85rem; color:rgba(255,255,255,0.5); cursor:pointer; background:none; border:none; padding:0; }
+    .logout-btn:hover { color:#fff; }
+    .main { margin-left:240px; padding:32px; min-height:100vh; }
+    .page-header { margin-bottom:28px; }
+    .page-header h2 { font-family:'DM Serif Display',serif; font-size:1.8rem; color:var(--green-dark); margin:0; }
+    .page-header p { color:#888; font-size:0.88rem; margin:4px 0 0; }
+    .stat-card { background:#fff; border-radius:14px; padding:22px 24px; border:1px solid var(--sand); }
+    .stat-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:#aaa; margin-bottom:6px; }
+    .stat-value { font-family:'DM Serif Display',serif; font-size:2rem; color:var(--green-dark); line-height:1; }
+    .stat-sub { font-size:0.78rem; color:var(--green-light); margin-top:4px; }
+    .section { display:none; }
+    .section.active { display:block; }
+    .content-card { background:#fff; border-radius:14px; border:1px solid var(--sand); padding:24px; margin-bottom:24px; }
+    .content-card h5 { font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--green-dark); margin-bottom:16px; }
+    .table { font-size:0.88rem; }
+    .table thead th { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:#aaa; border-bottom:1px solid var(--sand); font-weight:500; padding-bottom:10px; }
+    .table tbody td { color:var(--green-dark); padding:12px 8px; vertical-align:middle; border-bottom:1px solid #f5f0e8; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .btn-green { background:var(--green-mid); color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:0.88rem; cursor:pointer; transition:background 0.2s; }
+    .btn-green:hover { background:var(--green-dark); }
+    .btn-sm-delete { background:#f8d7da; color:#58151c; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; }
+    .btn-sm-delete:hover { background:#f1aeb5; }
+    .btn-sm-buy { background:#d1e7dd; color:#0a3622; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; }
+    .btn-sm-buy:hover { background:#a3cfbb; }
+    .btn-sm-edit { background:#e8f4fd; color:#1a5276; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; margin-right:4px; }
+    .btn-sm-edit:hover { background:#bde0f7; }
+    .form-label { font-size:0.78rem; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; color:var(--green-dark); margin-bottom:5px; }
+    .form-control { border:1.5px solid var(--sand); border-radius:8px; padding:10px 14px; font-size:0.9rem; color:var(--green-dark); }
+    .form-control:focus { border-color:var(--green-mid); box-shadow:0 0 0 3px rgba(45,106,79,0.1); outline:none; }
+    .alert-msg { border-radius:8px; padding:10px 14px; font-size:0.85rem; margin-bottom:12px; display:none; }
+    .alert-error   { background:#fdecea; color:#c0392b; border:1px solid #f5c6c6; }
+    .alert-success { background:#eafaf1; color:#1e8449; border:1px solid #a9dfbf; }
+    .empty-state { text-align:center; color:#bbb; padding:40px; font-size:0.9rem; }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; padding:32px; width:100%; max-width:400px; }
+    .modal-box h5 { font-family:'DM Serif Display',serif; font-size:1.3rem; color:var(--green-dark); margin-bottom:4px; }
+    .modal-box p { color:#888; font-size:0.85rem; margin-bottom:20px; }
+    .modal-actions { display:flex; gap:10px; margin-top:20px; }
+    .btn-cancel { background:#f0f0f0; color:#555; border:none; border-radius:8px; padding:10px 20px; font-size:0.88rem; cursor:pointer; }
+    .btn-cancel:hover { background:#e0e0e0; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand">Seed<span>Bank</span></div>
+  <div class="sidebar-label">My Farm</div>
+  <div class="nav-item active" onclick="showSection('overview', this)"><span class="nav-icon">&#9632;</span> Overview</div>
+  <div class="nav-item" onclick="showSection('my-seeds', this)"><span class="nav-icon">&#9673;</span> My Seeds</div>
+  <div class="nav-item" onclick="showSection('my-orders', this)"><span class="nav-icon">&#9835;</span> My Orders</div>
+  <div class="sidebar-label">Marketplace</div>
+  <div class="nav-item" onclick="showSection('marketplace', this)"><span class="nav-icon">&#9734;</span> Browse Seeds</div>
+  <div class="sidebar-footer">
+    <div class="farmer-badge">Farmer</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin-bottom:8px" id="sidebar-username"></div>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div id="section-overview" class="section active">
+    <div class="page-header">
+      <h2>Overview</h2>
+      <p>Welcome back, <span id="header-username"></span></p>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">My Seeds</div>
+          <div class="stat-value" id="stat-my-seeds">-</div>
+          <div class="stat-sub">listed for sale</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">My Orders</div>
+          <div class="stat-value" id="stat-my-orders">-</div>
+          <div class="stat-sub">purchases made</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-label">Marketplace</div>
+          <div class="stat-value" id="stat-marketplace">-</div>
+          <div class="stat-sub">seeds available</div>
+        </div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="content-card">
+          <h5>My Recent Seeds</h5>
+          <div id="overview-seeds-body"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="content-card">
+          <h5>My Recent Orders</h5>
+          <div id="overview-orders-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY SEEDS -->
+  <div id="section-my-seeds" class="section">
+    <div class="page-header">
+      <h2>My Seeds</h2>
+      <p>Manage seeds you have listed for sale</p>
+    </div>
+    <div class="content-card">
+      <h5>Add New Seed</h5>
+      <div id="seed-msg" class="alert-msg"></div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Name</label>
+          <input type="text" id="seed-name" class="form-control" placeholder="e.g. Samba Rice"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Category</label>
+          <input type="text" id="seed-category" class="form-control" placeholder="e.g. Grain"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Price (LKR/kg)</label>
+          <input type="number" id="seed-price" class="form-control" placeholder="0.00"/>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Quantity (kg)</label>
+          <input type="number" id="seed-quantity" class="form-control" placeholder="0"/>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Description</label>
+          <input type="text" id="seed-description" class="form-control" placeholder="Short description"/>
+        </div>
+        <div class="col-12">
+          <button class="btn-green" onclick="addSeed()">List Seed</button>
+        </div>
+      </div>
+    </div>
+    <div class="content-card">
+      <h5>My Listed Seeds</h5>
+      <div id="my-seeds-body"></div>
+    </div>
+  </div>
+
+  <!-- MY ORDERS -->
+  <div id="section-my-orders" class="section">
+    <div class="page-header">
+      <h2>My Orders</h2>
+      <p>Seeds you have purchased from the marketplace</p>
+    </div>
+    <div class="content-card">
+      <h5>Purchase History</h5>
+      <div id="my-orders-body"></div>
+    </div>
+  </div>
+
+  <!-- MARKETPLACE -->
+  <div id="section-marketplace" class="section">
+    <div class="page-header">
+      <h2>Marketplace</h2>
+      <p>Browse and buy seeds from other farmers</p>
+    </div>
+    <div class="content-card">
+      <h5>Available Seeds</h5>
+      <div id="marketplace-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BUY MODAL -->
+<div id="buy-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h5>Buy Seeds</h5>
+    <p id="modal-seed-info"></p>
+    <label class="form-label">Quantity (kg)</label>
+    <input type="number" id="modal-quantity" class="form-control" placeholder="Enter quantity" min="1"/>
+    <div id="modal-msg" class="alert-msg" style="margin-top:10px"></div>
+    <div class="modal-actions">
+      <button class="btn-green" onclick="confirmBuy()">Confirm Purchase</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h5>Edit Seed</h5>
+    <p>Update your seed listing</p>
+    <input type="hidden" id="edit-seed-id"/>
+    <div class="row g-3">
+      <div class="col-6">
+        <label class="form-label">Name</label>
+        <input type="text" id="edit-name" class="form-control"/>
+      </div>
+      <div class="col-6">
+        <label class="form-label">Category</label>
+        <input type="text" id="edit-category" class="form-control"/>
+      </div>
+      <div class="col-6">
+        <label class="form-label">Price (LKR)</label>
+        <input type="number" id="edit-price" class="form-control"/>
+      </div>
+      <div class="col-6">
+        <label class="form-label">Quantity (kg)</label>
+        <input type="number" id="edit-quantity" class="form-control"/>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Description</label>
+        <input type="text" id="edit-description" class="form-control"/>
+      </div>
+    </div>
+    <div id="edit-msg" class="alert-msg" style="margin-top:10px"></div>
+    <div class="modal-actions">
+      <button class="btn-green" onclick="confirmEdit()">Save Changes</button>
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API      = 'http://localhost:8080/api/v1';
+const token    = localStorage.getItem('token');
+const role     = localStorage.getItem('role');
+const username = localStorage.getItem('username') || 'Farmer';
+
+if (!token || role !== 'FARMER') window.location.href = 'Signin&Register.html';
+
+document.getElementById('header-username').textContent  = username;
+document.getElementById('sidebar-username').textContent = username;
+
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = 'Signin&Register.html';
+}
+
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'my-seeds')    loadMySeeds();
+  if (name === 'my-orders')   loadMyOrders();
+  if (name === 'marketplace') loadMarketplace();
+}
+
+function showMsg(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'alert-msg alert-' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideMsg(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+async function loadOverview() {
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      fetch(API + '/seeds/my',  { headers: authHeaders() }),
+      fetch(API + '/orders/my', { headers: authHeaders() }),
+      fetch(API + '/seeds',     { headers: authHeaders() }),
+    ]);
+    const seeds  = (await r1.json()).data || [];
+    const orders = (await r2.json()).data || [];
+    const all    = (await r3.json()).data || [];
+    const others = all.filter(s => s.farmerUsername !== username);
+
+    document.getElementById('stat-my-seeds').textContent   = seeds.length;
+    document.getElementById('stat-my-orders').textContent  = orders.length;
+    document.getElementById('stat-marketplace').textContent = others.length;
+
+    const seedsEl = document.getElementById('overview-seeds-body');
+    if (!seeds.length) { seedsEl.innerHTML = '<div class="empty-state">No seeds listed yet</div>'; }
+    else seedsEl.innerHTML = '<table class="table"><thead><tr><th>Name</th><th>Price (LKR)</th><th>Qty</th></tr></thead><tbody>' +
+      seeds.slice(0,4).map(s => '<tr><td><strong>' + s.name + '</strong></td><td>' + (s.price||0).toFixed(2) + '</td><td>' + s.quantity + '</td></tr>').join('') +
+      '</tbody></table>';
+
+    const ordersEl = document.getElementById('overview-orders-body');
+    if (!orders.length) { ordersEl.innerHTML = '<div class="empty-state">No purchases yet</div>'; }
+    else ordersEl.innerHTML = '<table class="table"><thead><tr><th>Items</th><th>Total (LKR)</th><th>Date</th></tr></thead><tbody>' +
+      orders.slice(0,4).map(o => '<tr><td>' + (o.items ? o.items.map(i => i.productName).join(', ') : '-') + '</td><td>' + (o.totalPrice||0).toFixed(2) + '</td><td>' + (o.orderedAt ? o.orderedAt.substring(0,10) : '-') + '</td></tr>').join('') +
+      '</tbody></table>';
+  } catch (e) { console.error(e); }
+}
+
+async function loadMySeeds() {
+  try {
+    const res  = await fetch(API + '/seeds/my', { headers: authHeaders() });
+    const data = (await res.json()).data || [];
+    const el   = document.getElementById('my-seeds-body');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">You have not listed any seeds yet</div>'; return; }
+    el.innerHTML = '<table class="table"><thead><tr><th>Name</th><th>Category</th><th>Price (LKR)</th><th>Qty (kg)</th><th>Description</th><th>Actions</th></tr></thead><tbody>' +
+      data.map(s => '<tr><td><strong>' + s.name + '</strong></td><td>' + (s.category||'-') + '</td><td>' + (s.price||0).toFixed(2) + '</td><td>' + s.quantity + '</td><td style="color:#888;font-size:0.82rem">' + (s.description||'-') + '</td><td>' +
+        '<button class="btn-sm-edit" onclick="openEditModal(' + s.id + ',\'' + s.name + '\',\'' + s.category + '\',' + s.price + ',' + s.quantity + ',\'' + (s.description||'') + '\')">Edit</button>' +
+        '<button class="btn-sm-delete" onclick="deleteSeed(' + s.id + ')">Delete</button></td></tr>').join('') +
+      '</tbody></table>';
+  } catch (e) { console.error(e); }
+}
+
+async function addSeed() {
+  hideMsg('seed-msg');
+  const dto = {
+    name:        document.getElementById('seed-name').value.trim(),
+    category:    document.getElementById('seed-category').value.trim(),
+    price:       parseFloat(document.getElementById('seed-price').value),
+    quantity:    parseInt(document.getElementById('seed-quantity').value),
+    description: document.getElementById('seed-description').value.trim(),
+  };
+  if (!dto.name || !dto.category) { showMsg('seed-msg','error','Name and category are required.'); return; }
+  try {
+    const res  = await fetch(API + '/seeds', { method:'POST', headers:authHeaders(), body:JSON.stringify(dto) });
+    const data = await res.json();
+    if (!res.ok) { showMsg('seed-msg','error', data.message || 'Failed to add seed.'); return; }
+    showMsg('seed-msg','success','Seed listed successfully!');
+    ['seed-name','seed-category','seed-price','seed-quantity','seed-description'].forEach(id => document.getElementById(id).value = '');
+    loadMySeeds(); loadOverview();
+  } catch (e) { showMsg('seed-msg','error','Could not connect to server.'); }
+}
+
+async function deleteSeed(id) {
+  if (!confirm('Delete this seed listing?')) return;
+  try {
+    await fetch(API + '/seeds/' + id, { method:'DELETE', headers:authHeaders() });
+    loadMySeeds(); loadOverview();
+  } catch (e) { console.error(e); }
+}
+
+function openEditModal(id, name, category, price, quantity, description) {
+  document.getElementById('edit-seed-id').value     = id;
+  document.getElementById('edit-name').value        = name;
+  document.getElementById('edit-category').value    = category;
+  document.getElementById('edit-price').value       = price;
+  document.getElementById('edit-quantity').value    = quantity;
+  document.getElementById('edit-description').value = description;
+  hideMsg('edit-msg');
+  document.getElementById('edit-modal').classList.add('show');
+}
+
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('show'); }
+
+async function confirmEdit() {
+  hideMsg('edit-msg');
+  const id  = document.getElementById('edit-seed-id').value;
+  const dto = {
+    name:        document.getElementById('edit-name').value.trim(),
+    category:    document.getElementById('edit-category').value.trim(),
+    price:       parseFloat(document.getElementById('edit-price').value),
+    quantity:    parseInt(document.getElementById('edit-quantity').value),
+    description: document.getElementById('edit-description').value.trim(),
+  };
+  try {
+    const res  = await fetch(API + '/seeds/' + id, { method:'PUT', headers:authHeaders(), body:JSON.stringify(dto) });
+    const data = await res.json();
+    if (!res.ok) { showMsg('edit-msg','error', data.message || 'Failed to update.'); return; }
+    closeEditModal(); loadMySeeds(); loadOverview();
+  } catch (e) { showMsg('edit-msg','error','Could not connect to server.'); }
+}
+
+async function loadMyOrders() {
+  try {
+    const res  = await fetch(API + '/orders/my', { headers: authHeaders() });
+    const data = (await res.json()).data || [];
+    const el   = document.getElementById('my-orders-body');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No purchases yet</div>'; return; }
+    el.innerHTML = '<table class="table"><thead><tr><th>Order ID</th><th>Items</th><th>Total (LKR)</th><th>Date</th></tr></thead><tbody>' +
+      data.map(o => '<tr><td>#' + o.id + '</td><td>' + (o.items ? o.items.map(i => i.productName + ' x' + i.quantity).join(', ') : '-') + '</td><td>' + (o.totalPrice||0).toFixed(2) + '</td><td>' + (o.orderedAt ? o.orderedAt.substring(0,10) : '-') + '</td></tr>').join('') +
+      '</tbody></table>';
+  } catch (e) { console.error(e); }
+}
+
+let selectedSeedId = null;
+let selectedMaxQty = null;
+
+async function loadMarketplace() {
+  try {
+    const res    = await fetch(API + '/seeds', { headers: authHeaders() });
+    const data   = (await res.json()).data || [];
+    const el     = document.getElementById('marketplace-body');
+    const others = data.filter(s => s.farmerUsername !== username);
+    if (!others.length) { el.innerHTML = '<div class="empty-state">No seeds available in the marketplace</div>'; return; }
+    el.innerHTML = '<table class="table"><thead><tr><th>Name</th><th>Category</th><th>Price (LKR/kg)</th><th>Qty (kg)</th><th>Seller</th><th>Description</th><th>Actions</th></tr></thead><tbody>' +
+      others.map(s => '<tr><td><strong>' + s.name + '</strong></td><td>' + (s.category||'-') + '</td><td>' + (s.price||0).toFixed(2) + '</td><td>' + s.quantity + '</td><td>' + s.farmerUsername + '</td><td style="color:#888;font-size:0.82rem">' + (s.description||'-') + '</td><td>' +
+        (s.quantity > 0 ? '<button class="btn-sm-buy" onclick="openBuyModal(' + s.id + ',\'' + s.name + '\',' + s.price + ',' + s.quantity + ')">Buy</button>' : '<span style="color:#bbb;font-size:0.78rem">Out of stock</span>') +
+        '</td></tr>').join('') +
+      '</tbody></table>';
+  } catch (e) { console.error(e); }
+}
+
+function openBuyModal(id, name, price, maxQty) {
+  selectedSeedId = id;
+  selectedMaxQty = maxQty;
+  document.getElementById('modal-seed-info').textContent = name + ' — LKR ' + price.toFixed(2) + '/kg (max ' + maxQty + ' kg available)';
+  document.getElementById('modal-quantity').value = '';
+  hideMsg('modal-msg');
+  document.getElementById('buy-modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('buy-modal').classList.remove('show');
+  selectedSeedId = null; selectedMaxQty = null;
+}
+
+async function confirmBuy() {
+  hideMsg('modal-msg');
+  const qty = parseInt(document.getElementById('modal-quantity').value);
+  if (!qty || qty <= 0) { showMsg('modal-msg','error','Enter a valid quantity.'); return; }
+  if (qty > selectedMaxQty) { showMsg('modal-msg','error','Only ' + selectedMaxQty + ' kg available.'); return; }
+  const dto = { items: [{ productId: selectedSeedId, quantity: qty }] };
+  try {
+    const res  = await fetch(API + '/orders', { method:'POST', headers:authHeaders(), body:JSON.stringify(dto) });
+    const data = await res.json();
+    if (!res.ok) { showMsg('modal-msg','error', data.message || 'Purchase failed.'); return; }
+    closeModal(); loadMarketplace(); loadOverview();
+    alert('Purchase successful!');
+  } catch (e) { showMsg('modal-msg','error','Could not connect to server.'); }
+}
+
+loadOverview();
+</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeedBank — Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --green-dark:#1a3a2a; --green-mid:#2d6a4f; --green-light:#52b788; --cream:#f8f4ee; --sand:#e9e0d0; }
+    * { box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--cream); margin:0; }
+    .sidebar { width:240px; min-height:100vh; background:var(--green-dark); position:fixed; top:0; left:0; display:flex; flex-direction:column; z-index:100; }
+    .sidebar-brand { font-family:'DM Serif Display',serif; font-size:1.6rem; color:#fff; padding:28px 24px 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .sidebar-brand span { color:var(--green-light); }
+    .sidebar-label { font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:20px 24px 8px; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:11px 24px; color:rgba(255,255,255,0.6); cursor:pointer; font-size:0.9rem; transition:all 0.15s; border-left:3px solid transparent; }
+    .nav-item:hover { color:#fff; background:rgba(255,255,255,0.05); }
+    .nav-item.active { color:#fff; background:rgba(82,183,136,0.12); border-left-color:var(--green-light); }
+    .nav-icon { font-size:1rem; width:20px; text-align:center; }
+    .sidebar-footer { margin-top:auto; padding:20px 24px; border-top:1px solid rgba(255,255,255,0.08); }
+    .admin-badge { font-size:0.75rem; background:rgba(82,183,136,0.15); color:var(--green-light); border-radius:6px; padding:4px 10px; margin-bottom:10px; display:inline-block; }
+    .logout-btn { font-size:0.85rem; color:rgba(255,255,255,0.5); cursor:pointer; background:none; border:none; padding:0; }
+    .logout-btn:hover { color:#fff; }
+    .main { margin-left:240px; padding:32px; min-height:100vh; }
+    .page-header { margin-bottom:28px; }
+    .page-header h2 { font-family:'DM Serif Display',serif; font-size:1.8rem; color:var(--green-dark); margin:0; }
+    .page-header p { color:#888; font-size:0.88rem; margin:4px 0 0; }
+    .stat-card { background:#fff; border-radius:14px; padding:22px 24px; border:1px solid var(--sand); }
+    .stat-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:#aaa; margin-bottom:6px; }
+    .stat-value { font-family:'DM Serif Display',serif; font-size:2rem; color:var(--green-dark); line-height:1; }
+    .stat-sub { font-size:0.78rem; color:var(--green-light); margin-top:4px; }
+    .section { display:none; }
+    .section.active { display:block; }
+    .content-card { background:#fff; border-radius:14px; border:1px solid var(--sand); padding:24px; margin-bottom:24px; }
+    .content-card h5 { font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--green-dark); margin-bottom:16px; }
+    .table { font-size:0.88rem; }
+    .table thead th { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:#aaa; border-bottom:1px solid var(--sand); font-weight:500; padding-bottom:10px; }
+    .table tbody td { color:var(--green-dark); padding:12px 8px; vertical-align:middle; border-bottom:1px solid #f5f0e8; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .badge-pending  { background:#fff3cd; color:#856404; font-size:0.75rem; border-radius:6px; padding:3px 10px; }
+    .badge-approved { background:#d1e7dd; color:#0a3622; font-size:0.75rem; border-radius:6px; padding:3px 10px; }
+    .badge-rejected { background:#f8d7da; color:#58151c; font-size:0.75rem; border-radius:6px; padding:3px 10px; }
+    .badge-admin    { background:rgba(82,183,136,0.15); color:var(--green-mid); font-size:0.75rem; border-radius:6px; padding:3px 10px; }
+    .badge-farmer   { background:#e8f4fd; color:#1a5276; font-size:0.75rem; border-radius:6px; padding:3px 10px; }
+    .btn-sm-approve { background:#d1e7dd; color:#0a3622; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; margin-right:4px; }
+    .btn-sm-approve:hover { background:#a3cfbb; }
+    .btn-sm-reject  { background:#f8d7da; color:#58151c; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; }
+    .btn-sm-reject:hover  { background:#f1aeb5; }
+    .btn-sm-delete  { background:#f8d7da; color:#58151c; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:pointer; }
+    .btn-sm-delete:hover  { background:#f1aeb5; }
+    .btn-disabled   { background:#f0f0f0; color:#bbb; border:none; border-radius:6px; padding:4px 12px; font-size:0.78rem; cursor:not-allowed; }
+    .empty-state { text-align:center; color:#bbb; padding:40px; font-size:0.9rem; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand">Seed<span>Bank</span></div>
+  <div class="sidebar-label">Management</div>
+  <div class="nav-item active" onclick="showSection('overview', this)"><span class="nav-icon">&#9632;</span> Overview</div>
+  <div class="nav-item" onclick="showSection('seeds', this)"><span class="nav-icon">&#9673;</span> Seeds</div>
+  <div class="nav-item" onclick="showSection('requests', this)"><span class="nav-icon">&#9993;</span> Seed Requests</div>
+  <div class="sidebar-label">System</div>
+  <div class="nav-item" onclick="showSection('users', this)"><span class="nav-icon">&#9786;</span> Users</div>
+  <div class="sidebar-footer">
+    <div class="admin-badge">Admin</div>
+    <div style="color:rgba(255,255,255,0.6);font-size:0.82rem;margin-bottom:8px" id="sidebar-username"></div>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div id="section-overview" class="section active">
+    <div class="page-header">
+      <h2>Overview</h2>
+      <p>Welcome back, <span id="header-username"></span></p>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Seeds</div>
+          <div class="stat-value" id="stat-seeds">—</div>
+          <div class="stat-sub">seed types listed</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Pending Requests</div>
+          <div class="stat-value" id="stat-pending">—</div>
+          <div class="stat-sub">awaiting approval</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-users">—</div>
+          <div class="stat-sub">registered users</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Farmers</div>
+          <div class="stat-value" id="stat-farmers">—</div>
+          <div class="stat-sub">active farmers</div>
+        </div>
+      </div>
+    </div>
+    <div class="content-card">
+      <h5>Pending Seed Requests</h5>
+      <div id="overview-requests-body"></div>
+    </div>
+  </div>
+
+  <!-- SEEDS - view only, no delete -->
+  <div id="section-seeds" class="section">
+    <div class="page-header">
+      <h2>Seeds</h2>
+      <p>All seeds posted by farmers</p>
+    </div>
+    <div class="content-card">
+      <h5>All Seeds</h5>
+      <div id="seeds-table-body"></div>
+    </div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div id="section-requests" class="section">
+    <div class="page-header">
+      <h2>Seed Requests</h2>
+      <p>Approve or reject farmer seed requests</p>
+    </div>
+    <div class="content-card">
+      <h5>All Requests</h5>
+      <div id="requests-table-body"></div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div id="section-users" class="section">
+    <div class="page-header">
+      <h2>Users</h2>
+      <p>You can delete farmer accounts or your own account. Other admin accounts cannot be deleted.</p>
+    </div>
+    <div class="content-card">
+      <h5>All Users</h5>
+      <div id="users-table-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API      = 'http://localhost:8080/api/v1';
+const token    = localStorage.getItem('token');
+const role     = localStorage.getItem('role');
+const username = localStorage.getItem('username') || 'Admin';
+
+if (!token || role !== 'ADMIN') window.location.href = 'Signin&Register.html';
+
+document.getElementById('header-username').textContent  = username;
+document.getElementById('sidebar-username').textContent = username;
+
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = 'Signin&Register.html';
+}
+
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'seeds')    loadSeeds();
+  if (name === 'requests') loadRequests();
+  if (name === 'users')    loadUsers();
+}
+
+// OVERVIEW
+async function loadOverview() {
+  try {
+    const [seedsRes, requestsRes, usersRes] = await Promise.all([
+      fetch(`${API}/seeds`,         { headers: authHeaders() }),
+      fetch(`${API}/seed-requests`, { headers: authHeaders() }),
+      fetch(`${API}/admin`,         { headers: authHeaders() }),
+    ]);
+    const seeds    = (await seedsRes.json()).data    || [];
+    const requests = (await requestsRes.json()).data || [];
+    const users    = (await usersRes.json()).data    || [];
+    const pending  = requests.filter(r => r.status === 'PENDING');
+    const farmers  = users.filter(u => u.role === 'FARMER');
+
+    document.getElementById('stat-seeds').textContent   = seeds.length;
+    document.getElementById('stat-pending').textContent = pending.length;
+    document.getElementById('stat-users').textContent   = users.length;
+    document.getElementById('stat-farmers').textContent = farmers.length;
+    renderOverviewRequests(pending.slice(0, 5));
+  } catch (e) { console.error(e); }
+}
+
+function renderOverviewRequests(requests) {
+  const el = document.getElementById('overview-requests-body');
+  if (!requests.length) { el.innerHTML = '<div class="empty-state">No pending requests</div>'; return; }
+  el.innerHTML = `
+    <table class="table"><thead><tr>
+      <th>Farmer</th><th>Seed ID</th><th>Qty (kg)</th><th>Notes</th><th>Actions</th>
+    </tr></thead><tbody>
+      ${requests.map(r => `<tr>
+        <td>${r.farmerUsername}</td><td>${r.seedId}</td><td>${r.quantity}</td>
+        <td>${r.notes || '—'}</td>
+        <td>
+          <button class="btn-sm-approve" onclick="approveRequest(${r.id})">Approve</button>
+          <button class="btn-sm-reject"  onclick="rejectRequest(${r.id})">Reject</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// SEEDS - view only
+async function loadSeeds() {
+  try {
+    const res  = await fetch(`${API}/seeds`, { headers: authHeaders() });
+    const data = (await res.json()).data || [];
+    const el   = document.getElementById('seeds-table-body');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No seeds posted yet</div>'; return; }
+    el.innerHTML = `
+      <table class="table"><thead><tr>
+        <th>Name</th><th>Category</th><th>Price (LKR)</th><th>Qty (kg)</th><th>Posted by</th><th>Description</th>
+      </tr></thead><tbody>
+        ${data.map(s => `<tr>
+          <td><strong>${s.name}</strong></td>
+          <td>${s.category || '—'}</td>
+          <td>${s.price != null ? s.price.toFixed(2) : '—'}</td>
+          <td>${s.quantity != null ? s.quantity : '—'}</td>
+          <td>${s.farmerUsername || '—'}</td>
+          <td style="color:#888;font-size:0.82rem">${s.description || '—'}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch (e) { console.error(e); }
+}
+
+// REQUESTS
+async function loadRequests() {
+  try {
+    const res  = await fetch(`${API}/seed-requests`, { headers: authHeaders() });
+    const data = (await res.json()).data || [];
+    const el   = document.getElementById('requests-table-body');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No requests yet</div>'; return; }
+    el.innerHTML = `
+      <table class="table"><thead><tr>
+        <th>Farmer</th><th>Seed ID</th><th>Qty (kg)</th><th>Notes</th><th>Date</th><th>Status</th><th>Actions</th>
+      </tr></thead><tbody>
+        ${data.map(r => `<tr>
+          <td>${r.farmerUsername}</td><td>${r.seedId}</td><td>${r.quantity}</td>
+          <td>${r.notes || '—'}</td>
+          <td>${r.requestedAt ? r.requestedAt.substring(0,10) : '—'}</td>
+          <td><span class="badge-${r.status.toLowerCase()}">${r.status}</span></td>
+          <td>${r.status === 'PENDING' ? `
+            <button class="btn-sm-approve" onclick="approveRequest(${r.id})">Approve</button>
+            <button class="btn-sm-reject"  onclick="rejectRequest(${r.id})">Reject</button>
+          ` : '—'}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch (e) { console.error(e); }
+}
+
+async function approveRequest(id) {
+  try {
+    await fetch(`${API}/seed-requests/${id}/approve`, { method:'PUT', headers:authHeaders() });
+    loadRequests(); loadOverview();
+  } catch (e) { console.error(e); }
+}
+
+async function rejectRequest(id) {
+  try {
+    await fetch(`${API}/seed-requests/${id}/reject`, { method:'PUT', headers:authHeaders() });
+    loadRequests(); loadOverview();
+  } catch (e) { console.error(e); }
+}
+
+// USERS
+async function loadUsers() {
+  try {
+    const res  = await fetch(`${API}/admin`, { headers: authHeaders() });
+    const data = (await res.json()).data || [];
+    const el   = document.getElementById('users-table-body');
+    if (!data.length) { el.innerHTML = '<div class="empty-state">No users found</div>'; return; }
+    el.innerHTML = `
+      <table class="table"><thead><tr>
+        <th>ID</th><th>Username</th><th>Role</th><th>Actions</th>
+      </tr></thead><tbody>
+        ${data.map(u => {
+          const isOtherAdmin = u.role === 'ADMIN' && u.username !== username;
+          const label = u.username === username ? ` <span style="color:#aaa;font-size:0.75rem">(you)</span>` : '';
+          const btn = isOtherAdmin
+            ? `<button class="btn-disabled" disabled title="Cannot delete other admins">Delete</button>`
+            : `<button class="btn-sm-delete" onclick="deleteUser(${u.id},'${u.role}','${u.username}')">Delete</button>`;
+          return `<tr>
+            <td>${u.id}</td>
+            <td>${u.username}${label}</td>
+            <td><span class="badge-${u.role.toLowerCase()}">${u.role}</span></td>
+            <td>${btn}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>`;
+  } catch (e) { console.error(e); }
+}
+
+async function deleteUser(id, userRole, targetUsername) {
+  const msg = userRole === 'ADMIN'
+    ? 'Delete your own account? You will be logged out.'
+    : `Delete farmer "${targetUsername}"?`;
+  if (!confirm(msg)) return;
+  try {
+    await fetch(`${API}/admin/users/${id}`, { method:'DELETE', headers:authHeaders() });
+    if (targetUsername === username) {
+      localStorage.clear();
+      window.location.href = 'Signin&Register.html';
+      return;
+    }
+    loadUsers(); loadOverview();
+  } catch (e) { console.error(e); }
+}
+
+loadOverview();
+</script>
+</body>
+</html>

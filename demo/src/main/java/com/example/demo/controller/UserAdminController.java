@@ -13,8 +13,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/admin")
-@CrossOrigin
-public class UserController {
+@CrossOrigin(origins = "*")
+public class UserAdminController {
 
     private final UserService userService;
     @GetMapping

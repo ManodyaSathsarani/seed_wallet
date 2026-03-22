@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.AuthDTO;
 import com.example.demo.dto.AuthResponseDTO;
 import com.example.demo.dto.RegisterDTO;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.impl.AuthServiceImpl;
 import com.example.demo.util.APIResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<APIResponse> register(@RequestBody RegisterDTO registerDTO) {
