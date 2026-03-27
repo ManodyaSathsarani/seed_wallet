@@ -529,7 +529,7 @@ Benefits
     divider.textContent = d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
     msgs.appendChild(divider);
 
-    addBotMsg(`👋 Hi! I'm your Meal Planning assistant. Ask me about <strong>recipes</strong>, <strong>calories</strong>, <strong>BMI</strong>, or <strong>meal plans</strong> — or pick a quick question below!`);
+    addBotMsg(`👋 Hi! I'm your seed management assistant. Ask me about <strong>recipes</strong>, <strong>calories</strong>, <strong>BMI</strong>, or <strong>meal plans</strong> — or pick a quick question below!`);
     showsuggestion();
 
 })();
